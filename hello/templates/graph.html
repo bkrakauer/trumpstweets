@@ -1,0 +1,15 @@
+<html>
+  <head>
+	<meta charset="utf-8">
+	<title>Plot Demo</title>
+	<link href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.1.min.css" rel="stylesheet" type="text/css">
+	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.1.min.js"></script>
+    {{ script | safe }}
+  </head>
+  <body>
+    <div class=page>
+	<h2>Graph of {{word}}</h2>
+	{{ div | safe }}
+	</div>
+  </body>
+</html>
