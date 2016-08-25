@@ -4,8 +4,7 @@ from django.http import HttpResponse
 import pandas as pd
 from bokeh.plotting import figure, show, output_file
 from bokeh.embed import components
-
-from .models import Greeting
+from .forms import SearchForm
 
 # Create your views here.
 def index(request):
@@ -14,14 +13,24 @@ def index(request):
 	# r = requests.get('http://httpbin.org/status/418')
 	# print r.text
 	# return HttpResponse('<pre>' + r.text + '</pre>')
-
-	word = 'hillary'
 	
-	plot = get_plot(word.lower())
-
-	script, div = components(plot)
-	return render(request, 'graph.html', {'script' : script, 'div' : div, 'word' : word})
+	# Do this on an ordinary GET request...
+	return render(request, 'index.html')
+	#word = 'hillary'
+	# Now, fix the below to handle this on a POST request...
 	
+
+def show_plot(request):
+	if request.method == "POST":
+		form = SearchForm(request.POST)
+		if form.is_valid():
+			word = form.cleaned_data['search_term']
+			plot = get_plot(word.lower())
+			script, div = components(plot)
+			return render(request, 'graph.html', {'script' : script, 'div' : div, 'word' : word})
+	else:
+		return render(request, 'index.html')
+
 def get_plot(word):
 	df = pd.read_csv('tweetdb.csv')
 	df.text = df.text.str.lower()  # do this in the db in the future
