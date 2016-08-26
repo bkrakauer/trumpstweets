@@ -5,6 +5,8 @@ import pandas as pd
 from bokeh.plotting import figure, show, output_file
 from bokeh.embed import components
 from .forms import SearchForm
+from matplotlib import pylab as plt
+import PIL, PIL.Image, StringIO
 
 # Create your views here.
 def index(request):
@@ -25,9 +27,25 @@ def show_plot(request):
 		form = SearchForm(request.POST)
 		if form.is_valid():
 			word = form.cleaned_data['search_term']
+			#   bokeh code below:
 			plot = get_plot(word.lower())
 			script, div = components(plot)
 			return render(request, 'graph.html', {'script' : script, 'div' : div, 'word' : word})
+			#   matplotlib code below:
+			"""
+			t = plt.arange(0.0, 2.0, .01)
+			s = plt.sin(2 * plt.pi * t)
+			plt.plot(t, s, linewidth=1.)
+			plt.title('simple graph!')
+			# store image in a buffer
+			buffer = StringIO.StringIO()
+			canvas = plt.get_current_fig_manager().canvas
+			canvas.draw()
+			pilImage = PIL.Image.fromstring("RGB", canvas.width_height(), canvas.tostring_rgb())
+			pilImage.save(buffer, "PNG")
+			plt.close()
+			return HttpResponse(buffer.getalue(), mimetype="image/png") 
+			"""
 	else:
 		return render(request, 'index.html')
 
