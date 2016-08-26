@@ -6,7 +6,7 @@ from bokeh.plotting import figure, show, output_file
 from bokeh.embed import components
 from .forms import SearchForm
 from matplotlib import pylab as plt
-import PIL, PIL.Image, StringIO
+# import PIL, PIL.Image, StringIO
 
 # Create your views here.
 def index(request):
