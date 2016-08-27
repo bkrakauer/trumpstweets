@@ -10,8 +10,10 @@
   </head>
   <body>
     <div class=page>
+	<p> Tweets with "{{word}}" are re-tweeted {{rts}} times on average. The average retweet rate in the dataset is {{avgrts}}.
 	<h2>Graph of {{word}}</h2>
 	{{ div | safe }}
 	</div>
+	{{timeframe}}
   </body>
 </html>

@@ -18,8 +18,6 @@ def index(request):
 	
 	# Do this on an ordinary GET request...
 	return render(request, 'index.html')
-	#word = 'hillary'
-	# Now, fix the below to handle this on a POST request...
 	
 
 def show_plot(request):
@@ -27,41 +25,33 @@ def show_plot(request):
 		form = SearchForm(request.POST)
 		if form.is_valid():
 			word = form.cleaned_data['search_term']
-			#   bokeh code below:
-			plot = get_plot(word.lower())
+			timeframe = form.cleaned_data['timeframe']
+			word = word.lower()
+			df = pd.read_csv('tweetdb.csv')
+			df.text = df.text.str.lower()  # do this in the db in the future
+			df_searchterm = df[df.text.str.contains(word)]
+			avgrts = sum(df.retweet_count) / len(df)
+			rts = sum(df_searchterm.retweet_count) / len(df_searchterm) if len(df_searchterm) > 0 else 0
+			plot = get_plot(df, df_searchterm, timeframe)
 			script, div = components(plot)
-			return render(request, 'graph.html', {'script' : script, 'div' : div, 'word' : word})
-			#   matplotlib code below:
-			"""
-			t = plt.arange(0.0, 2.0, .01)
-			s = plt.sin(2 * plt.pi * t)
-			plt.plot(t, s, linewidth=1.)
-			plt.title('simple graph!')
-			# store image in a buffer
-			buffer = StringIO.StringIO()
-			canvas = plt.get_current_fig_manager().canvas
-			canvas.draw()
-			pilImage = PIL.Image.fromstring("RGB", canvas.width_height(), canvas.tostring_rgb())
-			pilImage.save(buffer, "PNG")
-			plt.close()
-			return HttpResponse(buffer.getalue(), mimetype="image/png") 
-			"""
+			context = {'script': script, 'div': div, 'word': word, 'rts': rts, 'avgrts': avgrts, 'timeframe': timeframe}
+			return render(request, 'graph.html', context)
+		else:
+			return render(request, 'index.html')
 	else:
 		return render(request, 'index.html')
 
-def get_plot(word):
-	df = pd.read_csv('tweetdb.csv')
-	df.text = df.text.str.lower()  # do this in the db in the future
-	df = df[df.text.str.contains(word)]
-	x = range(-1, 8)
-	y = []
+def get_plot(df, subdf, timeframe):
+	# This is a bit of a hack, and we'll want to add labels....
+	# x = range(-1, 8)
+	# y = []
 	
-	for i in x:
-		y.append(len(df[df.month == i]))
+	x = range (1, max(df[timeframe]))
+	y = [len(subdf[subdf[timeframe] == i]) for i in x]
 	
-	p = figure(title="Tweets by Month", x_axis_label="Month", y_axis_label="Number of Tweets")
+	#fix headings, presumably by string interpolation.
+	p = figure(title="Tweets by %s" %timeframe, x_axis_label=timeframe, y_axis_label="Number of Tweets")
 	p.line(x, y, legend="Tweets", line_width=2)
-	#show(p)
 	return p
 	
 def db(request):
